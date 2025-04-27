@@ -36,20 +36,14 @@ export function parseVegaCSV(csvContent: string): VegaPlayer[] {
 
   // Skip the header row
   for (const row of rows.slice(1)) {
-    // Replace commas within quotes with underscores
-    const sanitizedRow = row.replace(/"(.*?)"/g, (match) =>
-      match.replace(/,/g, "_")
-    );
-    const columns = sanitizedRow
-      .split(";")
-      .map((col) => col.replace(/_/g, ","));
+    const columns = row.split(";").map((col) => col.trim().replace(/"/g, ""));
 
     players.push({
-      id: columns[0]?.trim().replace(/"/g, "") || "",
-      name: columns[1]?.trim().replace(/"/g, "") || "",
+      id: columns[0] || "",
+      name: columns[1] || "",
       rating: columns[2] ? parseInt(columns[2], 10) : null,
-      country: columns[3]?.trim().replace(/"/g, "") || "",
-      gender: columns[4]?.trim().replace(/"/g, "") || "",
+      country: columns[3] || "",
+      gender: columns[4] || "",
       birthYear: columns[5] ? parseInt(columns[5], 10) : null,
     });
   }

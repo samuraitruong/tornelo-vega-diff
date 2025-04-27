@@ -1,20 +1,22 @@
 "use client";
 
 import React, { useState } from "react";
-import { FaUpload } from "react-icons/fa";
+import { FaUpload, FaEye } from "react-icons/fa";
 import { parseTorneloCSV, parseVegaCSV } from "../csvReader";
-import { TorneloPlayer } from "@/model";
+import { TorneloPlayer, VegaPlayer } from "@/model";
 import { checkMissingPlayers } from "../utils/playerUtils";
 
 export default function Home() {
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [destinationFile, setDestinationFile] = useState<File | null>(null);
   const [playersWithMissingInfo, setPlayersWithMissingInfo] = useState<
-    (TorneloPlayer & { missingInVega: boolean })[]
+    (TorneloPlayer & { vegaPlayer: VegaPlayer })[]
   >([]);
   const [filterMissing, setFilterMissing] = useState<boolean>(false);
   const [useFuzzyMatch, setUseFuzzyMatch] = useState<boolean>(false);
   const [fuzzyMatchThreshold, setFuzzyMatchThreshold] = useState<number>(80);
+  const [selectedVegaPlayer, setSelectedVegaPlayer] =
+    useState<VegaPlayer | null>(null);
 
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -47,12 +49,20 @@ export default function Home() {
   };
 
   const filteredPlayers = filterMissing
-    ? playersWithMissingInfo.filter((player) => player.missingInVega)
+    ? playersWithMissingInfo.filter((player) => !player.vegaPlayer)
     : playersWithMissingInfo;
 
   const unmatchedCount = filteredPlayers.filter(
-    (player) => player.missingInVega
+    (player) => !player.vegaPlayer
   ).length;
+  console.log(filteredPlayers);
+  const openModal = (vegaPlayer: VegaPlayer) => {
+    setSelectedVegaPlayer(vegaPlayer);
+  };
+
+  const closeModal = () => {
+    setSelectedVegaPlayer(null);
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -143,15 +153,14 @@ export default function Home() {
                 <th className="border border-gray-400 px-4 py-2">
                   Missing in Vega
                 </th>
+                <th className="border border-gray-400 px-4 py-2">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredPlayers.map((player, index) => (
                 <tr
                   key={index}
-                  className={
-                    player.missingInVega ? "bg-red-100" : "bg-green-100"
-                  }
+                  className={!player.vegaPlayer ? "bg-red-100" : "bg-green-100"}
                 >
                   <td className="border border-gray-400 px-4 py-2">
                     {player.player}
@@ -166,7 +175,7 @@ export default function Home() {
                     {player.yob}
                   </td>
                   <td className="border border-gray-400 px-4 py-2 text-center">
-                    {player.missingInVega ? (
+                    {!player.vegaPlayer ? (
                       <span role="img" aria-label="missing">
                         ❌
                       </span>
@@ -176,10 +185,59 @@ export default function Home() {
                       </span>
                     )}
                   </td>
+                  <td className="border border-gray-400 px-4 py-2 text-center">
+                    {player.vegaPlayer && (
+                      <button
+                        onClick={() => openModal(player.vegaPlayer)}
+                        className="text-blue-500 hover:text-blue-700"
+                        title="View Vega Player"
+                      >
+                        <FaEye className="inline-block w-5 h-5" />
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {selectedVegaPlayer && (
+        <div
+          className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white p-6 rounded shadow-lg max-w-md w-full text-black relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeModal}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              ✖
+            </button>
+            <h2 className="text-xl font-bold mb-4">Vega Player Details</h2>
+            <p className="mb-2">
+              <strong>Player:</strong> {selectedVegaPlayer.name}
+            </p>
+            <p className="mb-2">
+              <strong>Country:</strong> {selectedVegaPlayer.country}
+            </p>
+            <p className="mb-2">
+              <strong>Rating:</strong> {selectedVegaPlayer.rating}
+            </p>
+            <p className="mb-2">
+              <strong>Gender:</strong> {selectedVegaPlayer.gender}
+            </p>
+            <p className="mb-2">
+              <strong>Year of Birth:</strong> {selectedVegaPlayer.birthYear}
+            </p>
+            <p className="mb-2">
+              <strong>Club:</strong> {selectedVegaPlayer.club}
+            </p>
+          </div>
         </div>
       )}
     </div>

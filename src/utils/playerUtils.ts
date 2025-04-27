@@ -11,7 +11,7 @@ export function checkMissingPlayers(
       .split(",")
       .map((name) => name.trim());
 
-    const exactMatch = vegaPlayers.some((vegaPlayer) => {
+    const exactMatch = vegaPlayers.find((vegaPlayer) => {
       const [vegaFirstName, vegaLastName] = vegaPlayer.name
         .split(",")
         .map((name) => name.trim());
@@ -34,7 +34,7 @@ export function checkMissingPlayers(
 
     return {
       ...torneloPlayer,
-      missingInVega: !exactMatch && !fuzzyMatch,
+      vegaPlayer: exactMatch || fuzzyMatch,
     };
   });
 }

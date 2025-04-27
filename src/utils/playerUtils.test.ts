@@ -17,14 +17,14 @@ describe("checkMissingPlayers", () => {
         rating: 1500,
         gender: "M",
         yob: 1990,
-        missingInVega: false,
+        vegaPlayer: { name: "John,Doe" },
       },
       {
         player: "Smith, Jane",
         rating: 1600,
         gender: "F",
         yob: 1992,
-        missingInVega: true,
+        vegaPlayer: null,
       },
     ]);
   });
@@ -52,7 +52,7 @@ describe("checkMissingPlayers", () => {
         rating: 1500,
         gender: "M",
         yob: 1990,
-        missingInVega: true,
+        vegaPlayer: null,
       },
     ]);
   });
