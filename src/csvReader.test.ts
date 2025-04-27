@@ -20,7 +20,7 @@ describe("CSV Parsing Functions", () => {
   });
 
   it("should correctly parse Vega CSV content", () => {
-    const csvContent = `ID,Name,Rating,Country,Gender,BirthYear\n1,"Ian,Kirk",2000,USA,M,1990`;
+    const csvContent = `ID;Name;Rating;Country;Gender;BirthYear\n1;"Ian,Kirk";2000;USA;M;1990`;
     const result = parseVegaCSV(csvContent);
 
     expect(result).toEqual([

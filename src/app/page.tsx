@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { FaUpload } from "react-icons/fa";
 import { parseTorneloCSV, parseVegaCSV } from "../csvReader";
 import { TorneloPlayer } from "@/model";
+import { checkMissingPlayers } from "../utils/playerUtils";
 
 export default function Home() {
   const [sourceFile, setSourceFile] = useState<File | null>(null);
@@ -33,25 +34,7 @@ export default function Home() {
     const torneloPlayers = parseTorneloCSV(sourceText);
     const vegaPlayers = parseVegaCSV(destinationText);
 
-    const playersWithMissing = torneloPlayers.map((torneloPlayer) => {
-      const [lastName, firstName] = torneloPlayer.player
-        .split(",")
-        .map((name) => name.trim());
-
-      const isInVega = vegaPlayers.some((vegaPlayer) => {
-        const vegaNameParts = vegaPlayer.name
-          .split(" ")
-          .map((name) => name.trim());
-        return (
-          vegaNameParts.includes(firstName) || vegaNameParts.includes(lastName)
-        );
-      });
-
-      return {
-        ...torneloPlayer,
-        missingInVega: !isInVega,
-      };
-    });
+    const playersWithMissing = checkMissingPlayers(torneloPlayers, vegaPlayers);
 
     setPlayersWithMissingInfo(playersWithMissing);
   };

@@ -40,7 +40,7 @@ export function parseVegaCSV(csvContent: string): VegaPlayer[] {
       match.replace(/,/g, "_")
     );
     const columns = sanitizedRow
-      .split(",")
+      .split(";")
       .map((col) => col.replace(/_/g, ","));
 
     players.push({
