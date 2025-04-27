@@ -16,4 +16,6 @@ export interface VegaPlayer {
   country: string;
   gender: string;
   birthYear: number | null;
+  club?: string;
+  federation?: string;
 }
