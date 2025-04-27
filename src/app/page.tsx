@@ -94,15 +94,6 @@ export default function Home() {
           <label className="flex items-center mr-4">
             <input
               type="checkbox"
-              checked={filterMissing}
-              onChange={(e) => setFilterMissing(e.target.checked)}
-              className="mr-2"
-            />
-            Show only missing players
-          </label>
-          <label className="flex items-center mr-4">
-            <input
-              type="checkbox"
               checked={useFuzzyMatch}
               onChange={(e) => setUseFuzzyMatch(e.target.checked)}
               className="mr-2"
@@ -125,6 +116,16 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      <label className="flex items-center mr-4">
+        <input
+          type="checkbox"
+          checked={filterMissing}
+          onChange={(e) => setFilterMissing(e.target.checked)}
+          className="mr-2"
+        />
+        Show only missing players
+      </label>
 
       {filteredPlayers.length > 0 && (
         <div className="mt-4">
