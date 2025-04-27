@@ -1,66 +1,9 @@
 "use client";
 
-import { useState } from "react";
-
-interface TorneloPlayer {
-  flag: string;
-  player: string;
-  rating: number | null;
-  gender: string;
-  yob: number | null;
-  u: number | null;
-  skip: boolean;
-  bye: boolean;
-}
-
-interface VegaPlayer {
-  id: string;
-  name: string;
-  rating: number | null;
-  country: string;
-  gender: string;
-  birthYear: number | null;
-}
-
-function parseTorneloCSV(csvContent: string): TorneloPlayer[] {
-  const rows = csvContent.split("\n").filter((row) => row.trim() !== "");
-  const players: TorneloPlayer[] = [];
-
-  for (const row of rows) {
-    const columns = row.split(",");
-    players.push({
-      flag: columns[1]?.trim().replace(/"/g, "") || "",
-      player: columns[2]?.trim().replace(/"/g, "") || "",
-      rating: columns[2] ? parseInt(columns[2], 10) : null,
-      gender: columns[3]?.trim().replace(/"/g, "") || "",
-      yob: columns[4] ? parseInt(columns[4], 10) : null,
-      u: columns[5] ? parseInt(columns[5], 10) : null,
-      skip: columns[6]?.trim().toLowerCase() === "true",
-      bye: columns[7]?.trim().toLowerCase() === "true",
-    });
-  }
-
-  return players;
-}
-
-function parseVegaCSV(csvContent: string): VegaPlayer[] {
-  const rows = csvContent.split("\n").filter((row) => row.trim() !== "");
-  const players: VegaPlayer[] = [];
-
-  for (const row of rows) {
-    const columns = row.split(",");
-    players.push({
-      id: columns[0]?.trim() || "",
-      name: columns[1]?.trim() || "",
-      rating: columns[2] ? parseInt(columns[2], 10) : null,
-      country: columns[3]?.trim() || "",
-      gender: columns[4]?.trim() || "",
-      birthYear: columns[5] ? parseInt(columns[5], 10) : null,
-    });
-  }
-
-  return players;
-}
+import React, { useState } from "react";
+import { FaUpload } from "react-icons/fa";
+import { parseTorneloCSV, parseVegaCSV } from "../csvReader";
+import { TorneloPlayer } from "@/model";
 
 export default function Home() {
   const [sourceFile, setSourceFile] = useState<File | null>(null);
@@ -117,53 +60,63 @@ export default function Home() {
     ? playersWithMissingInfo.filter((player) => player.missingInVega)
     : playersWithMissingInfo;
 
+  const unmatchedCount = filteredPlayers.filter(
+    (player) => player.missingInVega
+  ).length;
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">CSV File Comparator</h1>
 
-      <div className="mb-4">
-        <label className="block mb-2 font-medium">Source File (Tornelo):</label>
-        <input
-          type="file"
-          accept=".csv"
-          onChange={(e) => handleFileChange(e, setSourceFile)}
-          className="border p-2 w-full rounded"
-        />
-      </div>
+      <div className="border border-gray-300 rounded-lg p-4 mb-4">
+        <div className="flex justify-between items-center mb-4">
+          <div className="w-1/2 pr-2">
+            <label className="block mb-2 font-medium">
+              Source File (Tornelo):
+            </label>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={(e) => handleFileChange(e, setSourceFile)}
+              className="border p-2 w-full rounded"
+            />
+          </div>
+          <div className="w-1/2 pl-2">
+            <label className="block mb-2 font-medium">
+              Destination File (Vega):
+            </label>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={(e) => handleFileChange(e, setDestinationFile)}
+              className="border p-2 w-full rounded"
+            />
+          </div>
+        </div>
 
-      <div className="mb-4">
-        <label className="block mb-2 font-medium">
-          Destination File (Vega):
-        </label>
-        <input
-          type="file"
-          accept=".csv"
-          onChange={(e) => handleFileChange(e, setDestinationFile)}
-          className="border p-2 w-full rounded"
-        />
-      </div>
-
-      <div className="flex items-center mb-4">
-        <button
-          onClick={handleCompare}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-4"
-        >
-          Compare
-        </button>
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            checked={filterMissing}
-            onChange={(e) => setFilterMissing(e.target.checked)}
-            className="mr-2"
-          />
-          Show only missing players
-        </label>
+        <div className="flex items-center">
+          <button
+            onClick={handleCompare}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center mr-4"
+          >
+            <FaUpload className="h-5 w-5 mr-2" /> Compare
+          </button>
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={filterMissing}
+              onChange={(e) => setFilterMissing(e.target.checked)}
+              className="mr-2"
+            />
+            Show only missing players
+          </label>
+        </div>
       </div>
 
       {filteredPlayers.length > 0 && (
         <div className="mt-4">
           <h2 className="text-xl font-semibold mb-2">Players Comparison:</h2>
+          <p className="mb-2">Total unmatched players: {unmatchedCount}</p>
           <table className="table-auto border-collapse border border-gray-400 w-full text-black">
             <thead>
               <tr className="bg-gray-200">
@@ -198,8 +151,16 @@ export default function Home() {
                   <td className="border border-gray-400 px-4 py-2">
                     {player.yob}
                   </td>
-                  <td className="border border-gray-400 px-4 py-2">
-                    {player.missingInVega ? "Yes" : "No"}
+                  <td className="border border-gray-400 px-4 py-2 text-center">
+                    {player.missingInVega ? (
+                      <span role="img" aria-label="missing">
+                        ❌
+                      </span>
+                    ) : (
+                      <span role="img" aria-label="present">
+                        ✅
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
