@@ -9,12 +9,12 @@ export function checkMissingPlayers(
   return torneloPlayers.map((torneloPlayer) => {
     const [lastName, firstName] = torneloPlayer.player
       .split(",")
-      .map((name) => name.trim());
+      .map((name) => name.trim().toLowerCase());
 
     const exactMatch = vegaPlayers.find((vegaPlayer) => {
       const [vegaFirstName, vegaLastName] = vegaPlayer.name
         .split(",")
-        .map((name) => name.trim());
+        .map((name) => name.trim().toLowerCase());
 
       const nameMatch =
         (vegaFirstName === firstName && vegaLastName === lastName) ||

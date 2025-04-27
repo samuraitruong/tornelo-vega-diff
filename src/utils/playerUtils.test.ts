@@ -56,4 +56,32 @@ describe("checkMissingPlayers", () => {
       },
     ]);
   });
+
+  it("should compare names case-insensitively", () => {
+    const torneloPlayers = [
+      { player: "Doe, John", rating: 1500, gender: "M", yob: 1990 },
+      { player: "Smith, Jane", rating: 1600, gender: "F", yob: 1992 },
+    ];
+
+    const vegaPlayers = [{ name: "john,doe" }, { name: "JANE,SMITH" }];
+
+    const result = checkMissingPlayers(torneloPlayers, vegaPlayers);
+
+    expect(result).toEqual([
+      {
+        player: "Doe, John",
+        rating: 1500,
+        gender: "M",
+        yob: 1990,
+        vegaPlayer: { name: "john,doe" },
+      },
+      {
+        player: "Smith, Jane",
+        rating: 1600,
+        gender: "F",
+        yob: 1992,
+        vegaPlayer: { name: "JANE,SMITH" },
+      },
+    ]);
+  });
 });
