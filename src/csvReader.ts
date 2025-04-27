@@ -1,4 +1,5 @@
 import { TorneloPlayer, VegaPlayer } from "@/model";
+import Fuse from "fuse.js";
 
 export function parseTorneloCSV(csvContent: string): TorneloPlayer[] {
   const rows = csvContent.split("\n").filter((row) => row.trim() !== "");
@@ -54,4 +55,19 @@ export function parseVegaCSV(csvContent: string): VegaPlayer[] {
   }
 
   return players;
+}
+
+export function findClosestMatch(
+  name: string,
+  players: VegaPlayer[],
+  threshold: number
+): VegaPlayer | null {
+  // Invert the threshold to align with user expectations (higher = stricter)
+  const adjustedThreshold = 1 - threshold / 100;
+  const fuse = new Fuse(players, {
+    keys: ["name"],
+    threshold: adjustedThreshold,
+  });
+  const result = fuse.search(name);
+  return result.length > 0 ? result[0].item : null;
 }

@@ -1,10 +1,17 @@
-export function checkMissingPlayers(torneloPlayers, vegaPlayers) {
+import { findClosestMatch } from "../csvReader";
+
+export function checkMissingPlayers(
+  torneloPlayers,
+  vegaPlayers,
+  useFuzzyMatch = false,
+  fuzzyMatchThreshold = 80
+) {
   return torneloPlayers.map((torneloPlayer) => {
     const [lastName, firstName] = torneloPlayer.player
       .split(",")
       .map((name) => name.trim());
 
-    const isInVega = vegaPlayers.some((vegaPlayer) => {
+    const exactMatch = vegaPlayers.some((vegaPlayer) => {
       const [vegaFirstName, vegaLastName] = vegaPlayer.name
         .split(",")
         .map((name) => name.trim());
@@ -12,25 +19,22 @@ export function checkMissingPlayers(torneloPlayers, vegaPlayers) {
       const nameMatch =
         (vegaFirstName === firstName && vegaLastName === lastName) ||
         (vegaFirstName === lastName && vegaLastName === firstName);
-      console.log(torneloPlayer, vegaPlayer);
-      //   const yearOfBirthMatch =
-      //     torneloPlayer.yob &&
-      //     vegaPlayer.yob &&
-      //     torneloPlayer.yob === vegaPlayer.yob;
-      if (
-        torneloPlayer.player.includes("Nguyen") &&
-        vegaPlayer.name.includes("Nguyen")
-      ) {
-        console.log(
-          `Comparing Tornelo: ${firstName} ${lastName} with Vega: ${vegaFirstName} ${vegaLastName} result: ${nameMatch}`
-        );
-      }
+
       return nameMatch;
     });
 
+    const fuzzyMatch =
+      useFuzzyMatch && !exactMatch
+        ? findClosestMatch(
+            torneloPlayer.player,
+            vegaPlayers,
+            fuzzyMatchThreshold
+          )
+        : null;
+
     return {
       ...torneloPlayer,
-      missingInVega: !isInVega,
+      missingInVega: !exactMatch && !fuzzyMatch,
     };
   });
 }

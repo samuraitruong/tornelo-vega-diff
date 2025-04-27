@@ -13,6 +13,8 @@ export default function Home() {
     (TorneloPlayer & { missingInVega: boolean })[]
   >([]);
   const [filterMissing, setFilterMissing] = useState<boolean>(false);
+  const [useFuzzyMatch, setUseFuzzyMatch] = useState<boolean>(false);
+  const [fuzzyMatchThreshold, setFuzzyMatchThreshold] = useState<number>(80);
 
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -34,7 +36,12 @@ export default function Home() {
     const torneloPlayers = parseTorneloCSV(sourceText);
     const vegaPlayers = parseVegaCSV(destinationText);
 
-    const playersWithMissing = checkMissingPlayers(torneloPlayers, vegaPlayers);
+    const playersWithMissing = checkMissingPlayers(
+      torneloPlayers,
+      vegaPlayers,
+      useFuzzyMatch,
+      fuzzyMatchThreshold
+    );
 
     setPlayersWithMissingInfo(playersWithMissing);
   };
@@ -84,7 +91,7 @@ export default function Home() {
           >
             <FaUpload className="h-5 w-5 mr-2" /> Compare
           </button>
-          <label className="flex items-center">
+          <label className="flex items-center mr-4">
             <input
               type="checkbox"
               checked={filterMissing}
@@ -93,6 +100,29 @@ export default function Home() {
             />
             Show only missing players
           </label>
+          <label className="flex items-center mr-4">
+            <input
+              type="checkbox"
+              checked={useFuzzyMatch}
+              onChange={(e) => setUseFuzzyMatch(e.target.checked)}
+              className="mr-2"
+            />
+            Enable Fuzzy Matching
+          </label>
+          {useFuzzyMatch && (
+            <div className="flex items-center ml-4">
+              <label className="mr-2">Fuzzy Match Threshold:</label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={fuzzyMatchThreshold}
+                onChange={(e) => setFuzzyMatchThreshold(Number(e.target.value))}
+                className="mr-2"
+              />
+              <span>{fuzzyMatchThreshold}%</span>
+            </div>
+          )}
         </div>
       </div>
 
